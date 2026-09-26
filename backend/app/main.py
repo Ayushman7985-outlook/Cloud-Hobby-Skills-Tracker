@@ -96,11 +96,11 @@ orig = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=orig,
+    allow_origin_regex=r"https://cloud-hobby-skills-tracker(?:-[a-z0-9]+)?-cloud-assignment-portal\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 
 # --------------------------------------------------
 # AUTHENTICATION
