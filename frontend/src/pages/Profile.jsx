@@ -31,9 +31,7 @@ export default function Profile() {
         setUsername(profile.username || "");
         setBio(profile.bio || "");
         setInterests(
-          Array.isArray(profile.interests)
-            ? profile.interests.join(", ")
-            : ""
+          Array.isArray(profile.interests) ? profile.interests.join(", ") : "",
         );
         setProfilePicture(profile.profile_picture || "");
       } catch (error) {
@@ -100,16 +98,16 @@ export default function Profile() {
 
       const token = await currentUser.getIdToken();
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/files/profile",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
+      const response = await fetch(`${API_BASE_URL}/api/files/profile`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -144,8 +142,7 @@ export default function Profile() {
         <h3>Profile Information</h3>
 
         <p>
-          <strong>Email:</strong>{" "}
-          {currentUser?.email || "Not available"}
+          <strong>Email:</strong> {currentUser?.email || "Not available"}
         </p>
 
         {profilePicture && (
@@ -193,9 +190,7 @@ export default function Profile() {
             type="text"
             placeholder="Username"
             value={username}
-            onChange={(event) =>
-              setUsername(event.target.value)
-            }
+            onChange={(event) => setUsername(event.target.value)}
           />
 
           <textarea
@@ -209,9 +204,7 @@ export default function Profile() {
             type="text"
             placeholder="Interests (e.g. Python, Music, Cricket)"
             value={interests}
-            onChange={(event) =>
-              setInterests(event.target.value)
-            }
+            onChange={(event) => setInterests(event.target.value)}
           />
 
           <button type="submit" disabled={saving}>
@@ -225,11 +218,7 @@ export default function Profile() {
           </p>
         )}
 
-        {error && (
-          <p className="error-message">
-            {error}
-          </p>
-        )}
+        {error && <p className="error-message">{error}</p>}
       </div>
     </div>
   );
