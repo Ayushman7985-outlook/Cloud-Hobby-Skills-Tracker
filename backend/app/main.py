@@ -81,27 +81,20 @@ app = FastAPI(
 
 
 # --------------------------------------------------
+# --------------------------------------------------
 # CORS
 # --------------------------------------------------
 
-orig = [
-    x.strip()
-    for x in os.getenv(
-        "CORS_ORIGINS",
-        "http://localhost:5173"
-    ).split(",")
-    if x.strip()
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=orig,
-    allow_origin_regex=r"https://cloud-hobby-skills-tracker(?:-[a-z0-9]+)?-cloud-assignment-portal\.vercel\.app$",
+    allow_origins=[
+        "http://localhost:5173"
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
 # --------------------------------------------------
 # AUTHENTICATION
 # --------------------------------------------------
