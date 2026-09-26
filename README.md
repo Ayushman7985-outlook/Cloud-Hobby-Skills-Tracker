@@ -2,6 +2,16 @@
 
 A cloud-based web application for tracking hobbies and skills, recording practice activities, managing goals and milestones, monitoring progress through analytics, and sharing achievements with a community.
 
+
+## Project Links
+
+### LIVE PROJECT LINK
+https://cloud-hobby-skills-tracker-kappa.vercel.app/
+
+
+## FAST API DOCUMENTATION
+https://cloud-hobby-skills-tracker.onrender.com/docs
+
 ## 1. Project Overview
 
 The Online Hobby & Skills Tracker allows users to:
@@ -499,19 +509,7 @@ Current major components:
 - Automated API tests
 - Cloud deployment
 
-## 20. Project Links
 
-### Frontend
-
-https://cloud-hobby-skills-tracker-28ox14q1r-cloud-assignment-portal.vercel.app
-
-### Backend
-
-https://cloud-hobby-skills-tracker.onrender.com
-
-### GitHub
-
-https://github.com/Ayushman7985-outlook/Cloud-Hobby-Skills-Tracker
 
 ## 21. Author
 
