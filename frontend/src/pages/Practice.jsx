@@ -59,10 +59,19 @@ export default function Practice() {
         practiced_at: new Date().toISOString(),
       });
 
-      setSessions((currentSessions) => [
-        newSession,
-        ...currentSessions,
-      ]);
+      const selectedSkill = skills.find(
+  (skill) => skill.id === skillId
+);
+
+const sessionWithSkillName = {
+  ...newSession,
+  skill_name: selectedSkill?.skill_name || "Unknown Skill",
+};
+
+setSessions((currentSessions) => [
+  sessionWithSkillName,
+  ...currentSessions,
+]);
 
       setDuration("");
       setActivity("");
