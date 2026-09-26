@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+.env.local
+backend/.env
+backend/serviceAccountKey.json
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
