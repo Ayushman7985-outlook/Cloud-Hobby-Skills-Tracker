@@ -1036,6 +1036,10 @@ def analytics(
     ps = practices(u)
     gs = get_goals(u)
 
+    # --------------------------------------------------
+    # TOTAL PRACTICE TIME
+    # --------------------------------------------------
+
     minutes = sum(
         int(
             x.get(
@@ -1046,14 +1050,80 @@ def analytics(
         for x in ps
     )
 
+    # --------------------------------------------------
+    # WEEKLY + MONTHLY PRACTICE
+    # --------------------------------------------------
+
+    today = datetime.now(timezone.utc).date()
+
+    # Monday of the current week
+    week_start = today - timedelta(
+        days=today.weekday()
+    )
+
+    month_start = today.replace(
+        day=1
+    )
+
+    weekly_minutes = 0
+    monthly_minutes = 0
+
+    for x in ps:
+        practiced_at = x.get(
+            "practiced_at",
+            ""
+        )
+
+        if not practiced_at:
+            continue
+
+        try:
+            practice_date = datetime.fromisoformat(
+                practiced_at.replace(
+                    "Z",
+                    "+00:00"
+                )
+            ).date()
+        except (
+            ValueError,
+            TypeError
+        ):
+            continue
+
+        duration = int(
+            x.get(
+                "duration_minutes",
+                0
+            )
+        )
+
+        if practice_date >= week_start:
+            weekly_minutes += duration
+
+        if practice_date >= month_start:
+            monthly_minutes += duration
+
+    # --------------------------------------------------
+    # STREAKS
+    # --------------------------------------------------
+
     cur, best = streak(ps)
+
+    # --------------------------------------------------
+    # PRACTICE BY SKILL
+    # --------------------------------------------------
 
     by = {}
 
     for x in ps:
-        by[x["skill_name"]] = (
+        skill_name = x.get(
+            "skill_name",
+            "Unknown"
+        )
+
+        by[skill_name] = (
             by.get(
-                x["skill_name"],
+                skill_name,
                 0
             )
             + int(
@@ -1064,20 +1134,37 @@ def analytics(
             )
         )
 
+    # Most practiced skill
+    most_practiced_skill = (
+        max(
+            by,
+            key=by.get
+        )
+        if by
+        else "None"
+    )
+
+    # --------------------------------------------------
+    # COMMUNITY POSTS
+    # --------------------------------------------------
+
     posts = [
         x
         for x in (
             db.collection("posts")
             .stream()
         )
-        if x.to_dict().get("uid") == u
+        if x.to_dict().get(
+            "uid"
+        ) == u
     ]
 
-    lr = 0
-    cr = 0
+    likes_received = 0
+    comments_received = 0
 
     for x in posts:
-        lr += len(
+
+        likes_received += len(
             list(
                 x.reference
                 .collection("likes")
@@ -1085,7 +1172,7 @@ def analytics(
             )
         )
 
-        cr += len(
+        comments_received += len(
             list(
                 x.reference
                 .collection("comments")
@@ -1093,9 +1180,76 @@ def analytics(
             )
         )
 
+    # --------------------------------------------------
+    # GOALS
+    # --------------------------------------------------
+
+    goals_completed = sum(
+        x.get(
+            "progress",
+            0
+        ) >= 100
+        for x in gs
+    )
+
+    active_goals = sum(
+        x.get(
+            "status",
+            "ACTIVE"
+        ) == "ACTIVE"
+        and x.get(
+            "progress",
+            0
+        ) < 100
+        for x in gs
+    )
+
+    # --------------------------------------------------
+    # MILESTONES
+    # --------------------------------------------------
+
+    milestones_achieved = 0
+
+    for goal in gs:
+
+        milestones = goal.get(
+            "milestones",
+            []
+        )
+
+        milestones_achieved += sum(
+            milestone.get(
+                "achieved",
+                False
+            )
+            for milestone in milestones
+        )
+
+    # --------------------------------------------------
+    # FINAL RESPONSE
+    # --------------------------------------------------
+
     return {
         "totalPracticeHours":
-            round(minutes / 60, 1),
+            round(
+                minutes / 60,
+                1
+            ),
+
+        "weeklyPracticeHours":
+            round(
+                weekly_minutes / 60,
+                1
+            ),
+
+        "monthlyPracticeHours":
+            round(
+                monthly_minutes / 60,
+                1
+            ),
+
+        "mostPracticedSkill":
+            most_practiced_skill,
 
         "currentStreak":
             cur,
@@ -1111,20 +1265,22 @@ def analytics(
             ),
 
         "goalsCompleted":
-            sum(
-                x.get("progress", 0)
-                >= 100
-                for x in gs
-            ),
+            goals_completed,
+
+        "activeGoals":
+            active_goals,
+
+        "milestonesAchieved":
+            milestones_achieved,
 
         "postsCount":
             len(posts),
 
         "likesReceived":
-            lr,
+            likes_received,
 
         "commentsReceived":
-            cr,
+            comments_received,
 
         "practiceBySkill": [
             {
